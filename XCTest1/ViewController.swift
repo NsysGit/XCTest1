@@ -30,5 +30,25 @@ class ViewController: UIViewController {
             return num1 * num2
         }
     }
+    
+    // 足算
+    func add(_ x: Int, _ y: Int) -> Int {
+        return x + y
+    }
+    
+    // 引算
+    func subtract(_ x: Int, _ y: Int) -> Int {
+        return x - y
+    }
+    
+    // 乗算
+    func multiple(_ x: Int, _ y: Int) -> Int {
+        return x * y
+    }
+    
+    // 除算
+    func division(_ x: Int, _ y: Int) -> Int {
+        return x / y
+    }
 }
 
