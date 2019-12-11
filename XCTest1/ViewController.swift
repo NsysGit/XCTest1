@@ -7,16 +7,23 @@
 //
 
 import UIKit
+// import Foundation
 
 class ViewController: UIViewController {
     
     var subClass: SubClass!
+    // var calendarUtil: CalendarUtil!
     
-
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         self.subClass = SubClass(viewController: self)
+
+        // echo(message: "Hello"){(message) in print(message)}
+
+        let isHol = CalendarUtil().isHoliday1()
+        print(isHol)
+
     }
 
     class SubClass{
@@ -50,5 +57,65 @@ class ViewController: UIViewController {
     func division(_ x: Int, _ y: Int) -> Int {
         return x / y
     }
+
+    func echo(message: String,_ handler: @escaping(String) -> Void) {
+        DispatchQueue.global().async {
+            Thread.sleep(forTimeInterval: 3)
+            print("非同期")
+            DispatchQueue.global().async {
+                handler("\(message)!")
+            }
+
+        }
+        DispatchQueue.global().sync {
+            print("同期")
+        }
+        DispatchQueue.global().async(flags: .barrier) {
+            Thread.sleep(forTimeInterval: 3)
+            print("非同期A")
+        }
+        DispatchQueue.global().async(flags: .barrier) {
+            Thread.sleep(forTimeInterval: 1)
+            print("非同期B")
+        }
+
+    }
+    
+    func isHoliday(_ date:Date = Date()) -> Bool{
+        
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: date)
+        
+        return weekday == 1 || weekday == 7 || weekday == 4
+    }
+
 }
+
+protocol DateProtocol{
+    func nowx() -> Date
+}
+
+class DateDefault: DateProtocol{
+    func nowx() -> Date{
+        return Date()
+    }
+}
+
+class CalendarUtil{
+    let dateProtocolx: DateProtocol
+    
+    init(dateProtocol: DateProtocol = DateDefault()){
+        self.dateProtocolx = dateProtocol
+    }
+    
+    func isHoliday1() -> Bool {
+        let now = dateProtocolx.nowx()
+        
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: now)
+        
+        return weekday == 1 || weekday == 7 || weekday == 4
+    }
+}
+
 

@@ -9,6 +9,13 @@
 import XCTest
 @testable import XCTest1
 
+struct MockDateProtocol: DateProtocol{
+    var date: Date? = nil
+    func nowx() -> Date {
+       return date!
+    }
+}
+
 class XCTest1Tests: XCTestCase {
     
     var viewController: ViewController!
@@ -36,23 +43,81 @@ class XCTest1Tests: XCTestCase {
     }
     
     func test足算() {
-        let result = viewController.add(7,20)
-        XCTAssertEqual(result,27)
+        //let result = viewController.add(7,20)
+        //XCTAssertEqual(result,27,"7 + 20 = 27 の確認")
+        XCTAssertEqual(viewController.add(7,20),27,"7 + 20 = 27 の確認")
     }
 
     func test引算() {
-        let result = viewController.subtract(20,20)
-        XCTAssertEqual(result,0)
+        XCTContext.runActivity(named: "引算A"){ _ in
+            XCTAssertEqual(viewController.subtract(20,20),0)
+        }
+        XCTContext.runActivity(named: "引算B"){ _ in
+        }
+        XCTContext.runActivity(named: "引算C"){ _ in
+            XCTAssertEqual(viewController.subtract(120,20),100)
+        }
     }
 
     func test乗算() {
-        let result = viewController.multiple(25,18)
-        XCTAssertEqual(result,450)
+        XCTAssertEqual(viewController.multiple(25,18),450)
     }
 
     func test除算() {
-        let result = viewController.division(30,15)
-        XCTAssertEqual(result,2)
+        XCTAssertEqual(viewController.division(30,15),2)
+    }
+
+    func test非同期() {
+        let exp: XCTestExpectation = expectation(description: "wait")
+        
+        viewController.echo(message: "Good"){(message) in XCTAssertEqual(message, "Good!")
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 5)
+    }
+    
+    func testHoliday(){
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy/MM/dd"
+        
+        var date: Date!
+        
+        XCTContext.runActivity(named: "金曜日"){ _ in
+            date = formatter.date(from: "2019/12/06")
+            XCTAssertFalse(viewController.isHoliday(date))
+        }
+
+        XCTContext.runActivity(named: "土曜日"){ _ in
+            date = formatter.date(from: "2019/12/07")
+            XCTAssertTrue(viewController.isHoliday(date))
+        }
+
+        XCTContext.runActivity(named: "日曜日"){ _ in
+            date = formatter.date(from: "2019/12/08")
+            XCTAssertTrue(viewController.isHoliday(date))
+        }
+
+        XCTContext.runActivity(named: "月曜日"){ _ in
+            date = formatter.date(from: "2019/12/09")
+            XCTAssertFalse(viewController.isHoliday(date))
+        }
+
+        XCTContext.runActivity(named: "今日"){ _ in
+            XCTAssertFalse(viewController.isHoliday())
+        }
+
+
+    }
+    
+    func testIsHoiliday1(){
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy/MM/dd"
+        
+        var mock = MockDateProtocol()
+        
+        mock.date = formatter.date(from: "2019/12/10")
+        XCTAssertTrue(CalendarUtil(dateProtocol: mock).isHoliday1() )
     }
 
     func testPerformanceExample() {
